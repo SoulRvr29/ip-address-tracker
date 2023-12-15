@@ -36,7 +36,7 @@ function App() {
       <div className="absolute -z-10 h-full">
         <img
           className="h-72 object-cover"
-          src="\assets\pattern-bg-desktop.png"
+          src="assets\pattern-bg-desktop.png"
           alt="background"
         />
         {/* <div id="map" className="h-48"></div> */}
