@@ -7,3 +7,6 @@
   --very-dark-gray: hsl(0, 0%, 17%);
   --dark-gray: hsl(0, 0%, 59%);
 }
+.map {
+  height: calc(100vh - 18rem);
+}
