@@ -91,7 +91,7 @@ function App() {
             setIpAddress(newIpAddress);
 
             fetchHandler();
-            e.target.reset();
+
             console.log(newIpAddress);
             console.log(ipAddress);
           }}
