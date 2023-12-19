@@ -1,37 +1,48 @@
 // import { MapContainer, TileLayer, useMap } from "react-leaflet";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// import L from "react-leaflet";
 
 function App() {
-  const [ipAddress, _setIpAddress] = useState("192.212.174.101");
-  const [location, _setLocation] = useState("Brooklyn, NY 10001");
-  const [timezone, _setTimezone] = useState("UTC -05:00");
-  const [ISP, _setISP] = useState("SpaceX Starlink");
+  const [ipAddress, setIpAddress] = useState("");
+  const [location, setLocation] = useState("");
+  const [timezone, setTimezone] = useState("");
+  const [ISP, setISP] = useState("");
+  const [actualPosition, setActualPosition] = useState([34.04915, -118.09462]);
 
-  // fetch(
-  //   "https://geo.ipify.org/api/v2/country?apiKey=at_IRWCdlOHoiFuKZ2oUdTuZ9U9pzRcv&ipAddress=8.8.8.8"
-  // )
-  //   .then((response) => {
-  //     if (response.ok) {
-  //       return response.json();
-  //     } else {
-  //       alert("no data");
-  //     }
-  //   })
+  const [newIpAddress, setNewIpAddress] = useState("");
 
-  //   .then((data) => {
-  //     console.log(data);
-  //     setIpAddress(data.ip);
-  //     setLocation(data.location.country + ", " + data.location.region);
-  //     setTimezone(data.location.timezone);
-  //     setISP(data.isp);
-  //   });
+  useEffect(() => {
+    fetchHandler();
+  }, [ipAddress]);
 
-  // .catch((err) => {
-  //     alert("Something went wrong!", err);
-  // }
-  // );
+  const fetchHandler = async () => {
+    // console.log(
+    //   "https://geo.ipify.org/api/v2/country,city?apiKey=at_IRWCdlOHoiFuKZ2oUdTuZ9U9pzRcv&ipAddress=" +
+    //     ipAddress
+    // );
+
+    const response = await fetch(
+      "https://geo.ipify.org/api/v2/country,city?apiKey=at_IRWCdlOHoiFuKZ2oUdTuZ9U9pzRcv&ipAddress=" +
+        ipAddress
+    );
+    const data = await response.json();
+
+    console.log(data);
+
+    updateStates(data);
+  };
+
+  const updateStates = (data: any) => {
+    if (ipAddress == "") setIpAddress(data.ip);
+    setLocation(data.location.country + ", " + data.location.region);
+    setTimezone(data.location.timezone);
+    setISP(data.isp);
+    setActualPosition([data.location.lat, data.location.lng]);
+  };
+
   return (
     <main className="relative max-w-[1440px] h-screen mx-auto flex flex-col items-center">
       {/* background blured */}
@@ -50,15 +61,21 @@ function App() {
           alt="background"
         />
         <MapContainer
-          center={[51.505, -0.09]}
-          zoom={13}
-          scrollWheelZoom={false}
+          center={[actualPosition[0], actualPosition[1]]}
+          zoom={15}
+          scrollWheelZoom={true}
+          zoomControl={false}
           className="map max-w-[1440px] w-screen z-0 "
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <Marker position={[actualPosition[0], actualPosition[1]]}>
+            <Popup>
+              A pretty CSS3 popup. <br /> Easily customizable.
+            </Popup>
+          </Marker>
         </MapContainer>
       </div>
 
@@ -71,8 +88,12 @@ function App() {
           className="my-8 grid justify-center w-full text-[18px]"
           onSubmit={(e) => {
             e.preventDefault();
+            setIpAddress(newIpAddress);
 
-            // console.log(e.target.elements[0].value);
+            fetchHandler();
+            e.target.reset();
+            console.log(newIpAddress);
+            console.log(ipAddress);
           }}
         >
           <div className="flex max-sm:w-screen max-sm:px-8">
@@ -82,6 +103,8 @@ function App() {
               name="address"
               id="address"
               placeholder="Search for any IP address or domain"
+              onChange={(e) => setNewIpAddress(e.target.value)}
+              onBlur={(e) => (e.target.value = "")}
             />
             <button className="bg-black px-6 rounded-r-2xl hover:bg-veryDarkGray">
               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="14">
